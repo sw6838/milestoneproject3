@@ -10,7 +10,7 @@ async function defineCurrentUser(req, res, next) {
                     const id = result.value._id
                     let user = await User.findOne({_id: id})
                     req.currentUser = user
-                    console.log(req.currentUser)
+                    // console.log(req.currentUser)
                 }
             }
         next()

@@ -1,8 +1,13 @@
 const router = require("express").Router();
 const Workout = require("../models/workout");
+const User = require("../models/user");
+const { update } = require("../models/workout");
 
 // CREATE workout
 router.post("/", async (req, res) => {
+    if (!req.currentUser) {
+        return console.log("You must be logged in to create a workout.")
+    }
     const workout = new Workout({
         name: req.body.name,
         sets: req.body.sets,
@@ -11,8 +16,13 @@ router.post("/", async (req, res) => {
         type: req.body.type,
         createdBy: req.currentUser
     });
+    const user = await User.findOne({_id: req.currentUser})
+    if (req.currentUser != null) {
+        user.workouts.push(workout)
+    }
     try {
-        const newWorkout = await (await workout.save()).populate("createdBy", function(err){console.log(workout.createdBy)})
+        const newWorkout = await (await workout.save()).populate("createdBy")
+        await user.save()
         res.status(201).json(newWorkout)
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -36,7 +46,9 @@ router.get("/:id", getWorkout, (req, res) => {
 
 // UPDATE workout
 router.patch("/:id", getWorkout, async (req, res) => {
-    console.log("workout creator", res.workout.createdBy, "Current user", req.currentUser._id)
+    if (!req.currentUser) {
+        return console.log("You must be logged in to update a workout.")
+    }
     const workoutId = (res.workout.createdBy).toString()
     const currentUserId = (req.currentUser._id).toString()
     if (workoutId !== currentUserId) {
@@ -68,14 +80,21 @@ router.patch("/:id", getWorkout, async (req, res) => {
 
 // DELETE workout
 router.delete("/:id", getWorkout, async (req, res) => {
-    console.log("workout creator", res.workout.createdBy, "Current user", req.currentUser._id)
+    if (!req.currentUser) {
+        return console.log("You must be logged in to delete a workout.")
+    }
     const workoutId = (res.workout.createdBy).toString()
     const currentUserId = (req.currentUser._id).toString()
     if (workoutId !== currentUserId) {
         return console.log("Current user does not match workout creator")
     } else {
+        const user = await User.findOne({_id: res.workout.createdBy})
+        if (req.currentUser != null) {
+            user.workouts.remove(res.workout)
+        }
         try {
             await res.workout.remove();
+            await (await user.save()).populate("workouts")
             res.json({ message: "Deleted workout"});
         } catch (err) {
             res.status(500).json({ message: err.message });

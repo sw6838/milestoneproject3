@@ -15,10 +15,10 @@ export default function CurrentUserProvider({ children }) {
                     // "Content-Type": "application/json"
                 }
             });
-                console.log("response", response)
+                // console.log("response", response)
             // if (response.status === 200){
                 const user = await response.json()
-                console.log("user", user)
+                // console.log("user", user)
                 setCurrentUser(user)    
             // } else {
             //     setCurrentUser(null)

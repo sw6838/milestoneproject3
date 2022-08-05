@@ -12,11 +12,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     console.log("Connected to mongoDB");
 });
 
-app.use(cors({
-    // origin: "http://localhost:3000",
-    // methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    // credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());

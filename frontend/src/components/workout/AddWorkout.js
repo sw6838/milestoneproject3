@@ -27,7 +27,7 @@ export default function CreateWorkout() {
             },
             body: JSON.stringify(workout)
         });
-        console.log(workout)
+        // console.log(workout)
     setWorkout({workout})
     navigate("/");
     };
